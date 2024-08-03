@@ -10,23 +10,23 @@ import {DecentralizedStableCoin} from "src/DecentralizedStableCoin.sol";
 import {DSCEngine} from "src/DSCEngine.sol";
 import {DeployDSC} from "script/DeployDSC.s.sol";
 import {HelperConfig} from "script/HelperConfig.s.sol";
-import {ERC20Mock} from "../mocks/ERC20Mock.sol";
-import {Handler} from "./Handler.t.sol";
+import {ERC20Mock} from "../../mocks/ERC20Mock.sol";
+import {FailOnRevertHandler} from "./FailOnRevertHandler.t.sol";
 
-contract InvariantTest is StdInvariant, Test {
+contract FailOnRevertInvariantTest is StdInvariant, Test {
     DeployDSC deployer;
     DecentralizedStableCoin dsc;
     DSCEngine engine;
     HelperConfig helperConfig;
     address weth;
     address wbtc;
-    Handler handler;
+    FailOnRevertHandler handler;
 
     function setUp() external {
         deployer = new DeployDSC();
         (dsc, engine, helperConfig) = deployer.run();
         (, , weth, wbtc, ) = helperConfig.activeNetworkConfig();
-        handler = new Handler(engine, dsc);
+        handler = new FailOnRevertHandler(engine, dsc);
         targetContract(address(handler));
     }
 
@@ -48,6 +48,12 @@ contract InvariantTest is StdInvariant, Test {
     function invariant_getterShouldNotRevert() public view {
         // all the getters should be listed here
         // <forge inspect DSCEngine methods>
+        engine.getAdditionalFeedPrecision();
+        engine.getCollateralTokens();
+        engine.getLiquidationBonus();
+        engine.getLiquidationThreshold();
+        engine.getMinHealthFactor();
         engine.getPrecision();
+        engine.getDsc();
     }
 }
